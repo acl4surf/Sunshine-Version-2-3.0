@@ -35,15 +35,19 @@ public class WeatherContract {
 
     /*
         Inner class that defines the table contents of the location table
-        Students: This is where you will add the strings.  (Similar to what has been
-        done for WeatherEntry)
      */
     public static final class LocationEntry implements BaseColumns {
         public static final String TABLE_NAME = "location";
-
+        // location setting string used as the location query to OWM
+        public static final String COLUMN_LOCATION_SETTING = "location_setting";
+        // city name provided by the API based on postal code
+        public static final String COLUMN_CITY_NAME = "city_name";
+        // Store latitude and longitude from OWP api to launch the map intent
+        public static final String COLUMN_COORD_LAT = "coord_lat";
+        public static final String COLUMN_COORD_LONG = "coord_long";
     }
 
-    /* Inner class that defines the table contents of the weather table */
+    /* Inner class that defines the contents of the weather table */
     public static final class WeatherEntry implements BaseColumns {
 
         public static final String TABLE_NAME = "weather";
