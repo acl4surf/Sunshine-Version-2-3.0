@@ -15,6 +15,7 @@
  */
 package com.example.android.sunshine.app.data;
 
+import android.content.ContentValues;
 import android.test.AndroidTestCase;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -38,13 +39,8 @@ public class TestDb extends AndroidTestCase {
     }
 
     /*
-        Students: Uncomment this test once you've written the code to create the Location
-        table.  Note that you will have to have chosen the same column names that I did in
-        my solution for this test to compile, so if you haven't yet done that, this is
-        a good time to change your column names to match mine.
-
-        Note that this only tests that the Location table has the correct columns, since we
-        give you the code for the weather table.  This test does not look at the
+        Tests: db, tables, columns created properly.
+        Note that this only tests that the Location table has the correct columns
      */
     public void testCreateDb() throws Throwable {
         // build a HashSet of all of the table names we wish to look for
@@ -53,8 +49,7 @@ public class TestDb extends AndroidTestCase {
         final HashSet<String> tableNameHashSet = new HashSet<String>();
         tableNameHashSet.add(WeatherContract.LocationEntry.TABLE_NAME);
         tableNameHashSet.add(WeatherContract.WeatherEntry.TABLE_NAME);
-
-        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+        deleteTheDatabase();
         SQLiteDatabase db = new WeatherDbHelper(
                 this.mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
@@ -70,9 +65,8 @@ public class TestDb extends AndroidTestCase {
             tableNameHashSet.remove(c.getString(0));
         } while( c.moveToNext() );
 
-        // if this fails, it means that your database doesn't contain both the location entry
-        // and weather entry tables
-        assertTrue("Error: Your database was created without both the location entry and weather entry tables",
+        // if this fails, database doesn't contain the location and weather tables
+        assertTrue("Error: Your database was created without location and weather tables",
                 tableNameHashSet.isEmpty());
 
         // now, do our tables contain the correct columns?
@@ -104,28 +98,36 @@ public class TestDb extends AndroidTestCase {
     }
 
     /*
-        Students:  Here is where you will build code to test that we can insert and query the
-        location database.  We've done a lot of work for you.  You'll want to look in TestUtilities
-        where you can uncomment out the "createNorthPoleLocationValues" function.  You can
-        also make use of the ValidateCurrentRecord function from within TestUtilities.
+        Test that we can insert and query the location database. Use functions in TestUtilities.
     */
     public void testLocationTable() {
         // First step: Get reference to writable database
-
-        // Create ContentValues of what you want to insert
+        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // Second: Create ContentValues of what you want to insert
         // (you can use the createNorthPoleLocationValues if you wish)
-
+        ContentValues testValues = TestUtilities.createNorthPoleLocationValues();
         // Insert ContentValues into database and get a row ID back
-
+        long locationRowId;
+        locationRowId = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, testValues);
+        // Verify a row came back
+        assertTrue(locationRowId != -1);
+        // Data's inserted in theory
         // Query the database and receive a Cursor back
-
+        Cursor cursor = db.query(WeatherContract.LocationEntry.TABLE_NAME,
+                null, null, null, null, null, null);
         // Move the cursor to a valid database row
-
+        assertTrue("Error: No records returned from location query", cursor.moveToFirst());
         // Validate data in resulting Cursor with the original ContentValues
-        // (you can use the validateCurrentRecord function in TestUtilities to validate the
-        // query if you like)
-
+        // Use the validateCurrentRecord function in TestUtilities to validate the query
+        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed",
+                cursor, testValues);
+        // Confirm only one row in db
+        assertFalse("Error: More than one row returned from location query",
+                cursor.moveToNext());
         // Finally, close the cursor and database
+        cursor.close();
+        db.close();
 
     }
 
